@@ -61,19 +61,28 @@ def move_player():
     while True:
         domino = choose_domino()
         if domino == 0:
-            # if len(stock_pieces) > 0:
-            player_pieces.append(stock_pieces.pop())
-            break
+            if len(stock_pieces) > 0:
+                player_pieces.append(stock_pieces.pop())
+                break
+            else:
+                break
         elif domino > 0:
-            # if domino_snake[-1][1] in player_pieces[domino - 1]:
-            domino_snake.append(player_pieces[domino - 1])
-            player_pieces.remove(player_pieces[domino - 1])
-            break
+            if domino_snake[-1][1] in player_pieces[domino - 1]:
+                if domino_snake[-1][1] == player_pieces[domino - 1][0]:
+                    domino_snake.append(player_pieces[domino - 1])
+                else:
+                    domino_snake.append(player_pieces[domino - 1][::-1])
+                player_pieces.remove(player_pieces[domino - 1])
+                break
         else:
-            # if domino_snake[0][0] in player_pieces[abs(domino) - 1]:
-            domino_snake.insert(0, player_pieces[abs(domino) - 1])
-            player_pieces.remove(player_pieces[abs(domino) - 1])
-            break
+            if domino_snake[0][0] in player_pieces[abs(domino) - 1]:
+                if domino_snake[0][0] == player_pieces[abs(domino) - 1][1]:
+                    domino_snake.insert(0, player_pieces[abs(domino) - 1])
+                else:
+                    domino_snake.insert(0, player_pieces[abs(domino) - 1][::-1])
+                player_pieces.remove(player_pieces[abs(domino) - 1])
+                break
+        print("Illegal move. Please try again.")
     return
 
 
@@ -81,7 +90,7 @@ def choose_domino():
     while True:
         try:
             move = int(input())
-            if abs(move) <= len(computer_pieces):
+            if abs(move) <= len(player_pieces):
                 return move
             print("Invalid input. Please try again.")
         except ValueError:
@@ -95,17 +104,27 @@ def move_computer():
     while True:
         domino = random.randint(-(len(computer_pieces)), len(computer_pieces))
         if domino == 0:
-            computer_pieces.append(stock_pieces.pop())
-            break
+            if len(stock_pieces) > 0:
+                computer_pieces.append(stock_pieces.pop())
+                break
+            else:
+                break
         if domino > 0:
-            domino_snake.append(computer_pieces[domino - 1])
-            computer_pieces.remove(computer_pieces[domino - 1])
-            break
+            if domino_snake[-1][1] in computer_pieces[domino - 1]:
+                if domino_snake[-1][1] == computer_pieces[domino - 1][0]:
+                    domino_snake.append(computer_pieces[domino - 1])
+                else:
+                    domino_snake.append(computer_pieces[domino - 1][::-1])
+                computer_pieces.remove(computer_pieces[domino - 1])
+                break
         else:
-            # if domino_snake[0][0] in player_pieces[abs(domino) - 1]:
-            domino_snake.insert(0, computer_pieces[abs(domino) - 1])
-            computer_pieces.remove(computer_pieces[abs(domino) - 1])
-            break
+            if domino_snake[0][0] in computer_pieces[abs(domino) - 1]:
+                if domino_snake[0][0] == computer_pieces[abs(domino) - 1][1]:
+                    domino_snake.insert(0, computer_pieces[abs(domino) - 1])
+                else:
+                    domino_snake.insert(0, computer_pieces[abs(domino) - 1][::-1])
+                computer_pieces.remove(computer_pieces[abs(domino) - 1])
+                break
     return
 
 
@@ -116,6 +135,19 @@ def analyze_game():
         return False
     elif len(computer_pieces) == 0:
         print(over_text[1])
+        return False
+    elif len(stock_pieces) == 0:
+        for domino in player_pieces:
+            if domino_snake[-1][1] in domino:
+                return True
+            if domino_snake[0][0] in domino:
+                return True
+        for domino in computer_pieces:
+            if domino_snake[-1][1] in domino:
+                return True
+            if domino_snake[0][0] in domino:
+                return True
+        print(over_text[2])
         return False
     return  True
 
