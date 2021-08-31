@@ -1,5 +1,6 @@
 import random
 from random import shuffle
+from operator import itemgetter
 
 status_text = ["It's your turn to make a move. Enter your command.", "Computer is about to make a move. Press Enter to continue..."]
 over_text = ["Status: The game is over. You won!",
@@ -11,6 +12,10 @@ for x in range(7):
     for y in range(7):
         if x <= y:
             pieces.append([x,y])
+
+# lists for computer ki
+ki_score = {}
+scored_list = []
 
 domino_snake = []
 status = None
@@ -97,7 +102,7 @@ def choose_domino():
             print("Invalid input. Please try again.")
 
 def enter_return():
-    move = input()
+    _ = input()
     return
 
 def move_computer():
@@ -127,6 +132,59 @@ def move_computer():
                 break
     return
 
+def init_ki_score():
+    for i in range(7):
+        ki_score[i] = 0
+    # print("KI Score: {0}".format(ki_score))
+    return
+
+def calculate_ki_score():
+    init_ki_score()
+    for domino in domino_snake:
+        ki_score[domino[0]] += 1
+        ki_score[domino[1]] += 1
+    for domino in computer_pieces:
+        ki_score[domino[0]] += 1
+        ki_score[domino[1]] += 1
+    # print("KI Score: {0}".format(ki_score))
+    return
+
+def calulate_hand_score():
+    calculate_ki_score()
+    scored_list = []
+    for idx, domino in enumerate(computer_pieces):
+        # print(domino)
+        scored_list.append([idx,ki_score[domino[0]] + ki_score[domino[1]]])
+    # print(scored_list)
+    scored_list = sorted(scored_list, key=itemgetter(1)) # , reverse=True)
+    # print(scored_list)
+    return scored_list
+
+def ai_move_computer():
+    scored_list = calulate_hand_score()
+    # print(scored_list)
+    while len(scored_list) > 0:
+        scored_domino = scored_list.pop()
+        domino = computer_pieces[scored_domino[0]]
+        if domino_snake[-1][1] in domino:
+            if domino_snake[-1][1] == domino[0]:
+                domino_snake.append(domino)
+            else:
+                domino_snake.append(domino[::-1])
+            computer_pieces.remove(domino)
+            return
+        elif domino_snake[0][0] in domino:
+            if domino_snake[0][0] == domino[1]:
+                domino_snake.insert(0, domino)
+            else:
+                domino_snake.insert(0, domino[::-1])
+            computer_pieces.remove(domino)
+            return
+
+    if len(stock_pieces) > 0:
+        computer_pieces.append(stock_pieces.pop())
+
+    return
 
 
 def analyze_game():
@@ -160,7 +218,7 @@ while over is False:
         move_player()
     else:
         enter_return()
-        move_computer()
+        ai_move_computer()
 
     if status == 0:
         status = 1
